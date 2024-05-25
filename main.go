@@ -1,20 +1,34 @@
 package main
 
 import (
-	// "fmt"
-	// "io"
+	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 )
+
+func api(lat float64, lon float64) string {
+	return fmt.Sprintf("{\"lat\": %f, \"lon\": %f}", lat, lon)
+}
 
 func Api(w http.ResponseWriter, req *http.Request) {
 
 	query := req.URL.Query()
-	lat := query.Get("lat")
-	lon := query.Get("lon")
+	lat, err := strconv.ParseFloat(query.Get("lat"), 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
+	lon, err := strconv.ParseFloat(query.Get("lon"), 64)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
+		return
+	}
 
 	w.Header().Set("Content-Type", "text/jsom")
-	w.Write([]byte("{\"lat\": " + lat + ", \"lon\": " + lon + "}"))
+	w.Write([]byte(api(lat, lon)))
 	// fmt.Fprintf(w, "This is an example server.\n")
 	// io.WriteString(w, "This is an example server.\n")
 }

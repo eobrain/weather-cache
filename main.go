@@ -19,7 +19,9 @@ func init() {
 }
 
 func api(lat float64, lon float64) (string, error) {
-	requestURL := fmt.Sprintf(`https://api.openweathermap.org/data/2.5/weather?lat=%f&lon=%f&units=metric&appid=%s`, lat, lon, apiKey)
+	requestURL := fmt.Sprintf(
+		`https://api.openweathermap.org/data/2.5/forecast?lat=%f&lon=%f&units=metric&appid=%s`,
+		lat, lon, apiKey)
 	res, err := http.Get(requestURL)
 	if err != nil {
 		return fmt.Sprintf("error making http request: '%s'", requestURL), err

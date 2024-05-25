@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"strconv"
@@ -18,10 +19,14 @@ func init() {
 	}
 }
 
-func api(lat float64, lon float64) (string, error) {
+func api(latScaled int, lonScaled int) (string, error) {
+	cacheKey := fmt.Sprintf("%d:%d", latScaled, lonScaled)
+	fmt.Printf("cacheKey=%s\n", cacheKey)
+
 	requestURL := fmt.Sprintf(
 		`https://api.openweathermap.org/data/2.5/forecast?lat=%f&lon=%f&units=metric&appid=%s`,
-		lat, lon, apiKey)
+		unscale(latScaled), unscale(lonScaled), apiKey)
+	fmt.Printf("%s\n", requestURL)
 	res, err := http.Get(requestURL)
 	if err != nil {
 		return fmt.Sprintf("error making http request: '%s'", requestURL), err
@@ -34,16 +39,23 @@ func api(lat float64, lon float64) (string, error) {
 	return string(resBody), nil
 }
 
+func scale(x float64) int {
+	return int(math.Round(x * 10000))
+}
+func unscale(i int) float64 {
+	return float64(i) / 10000
+}
+
 func Api(w http.ResponseWriter, req *http.Request) {
 
 	query := req.URL.Query()
-	lat, err := strconv.ParseFloat(query.Get("lat"), 64)
+	lat, err := strconv.ParseFloat(query.Get("lat"), 32)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
 		return
 	}
-	lon, err := strconv.ParseFloat(query.Get("lon"), 64)
+	lon, err := strconv.ParseFloat(query.Get("lon"), 32)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(err.Error()))
@@ -51,7 +63,7 @@ func Api(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	result, err := api(lat, lon)
+	result, err := api(scale(lat), scale(lon))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(err.Error()))

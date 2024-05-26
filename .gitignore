@@ -1,1 +1,4 @@
-run
+OPENWEATHERMAP_API_KEY
+weather-cache
+server.crt
+server.key

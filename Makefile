@@ -1,4 +1,4 @@
-run: weather-cache
+run: weather-cache server.crt
 	OPENWEATHERMAP_API_KEY=`cat OPENWEATHERMAP_API_KEY` ./weather-cache
 
 weather-cache: main.go

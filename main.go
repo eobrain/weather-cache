@@ -81,6 +81,7 @@ func Api(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", req.Header.Get("Origin"))
 	result, err := api(scale(lat), scale(lon))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
